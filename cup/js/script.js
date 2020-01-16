@@ -15,30 +15,39 @@ const Scene = {
 		texture: null,
 		mouse: new THREE.Vector2(),
 		raycaster: new THREE.Raycaster(),
-		animSpeed: null,
 		animPercent: 0.00,
 		text: "DAWIN"
 	},
     animate: () => {
         requestAnimationFrame(Scene.animate);
         Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
-        if( Scene.vars.UltimaThule != undefined ){
+        if( Scene.vars.Arrokoth != undefined && Scene.vars.isReal ){
             var intersect = Scene.vars.raycaster.intersectObjects(Scene.vars.Arrokoth.children, true);
             if(intersect.length>0){
-                Scene.vars.animeSpeed = 0.05;
-                
-                Scene.customAnimation();
             }
+
 			let mouse = new THREE.Vector3(Scene.vars.mouse.x, Scene.vars.mouse.y, 0);
 			mouse.unproject(Scene.vars.camera);
 
 			let ray = new THREE.Raycaster(Scene.vars.camera.position, mouse.sub(Scene.vars.camera.position).normalize()); 
 			let intersects = ray.intersectObjects(Scene.vars.Arrokoth.children, true);
 			if(intersects.length > 0) {
-                Scene.vars.animeSpeed = 0.05;
-                
-                Scene.customAnimation();
-				console.log('1')
+                Scene.customAnimation(0.005);
+			}
+		};
+		
+        if( Scene.vars.UltimaThule != undefined && !Scene.vars.isReal ){
+            var intersect = Scene.vars.raycaster.intersectObjects(Scene.vars.UltimaThule.children, true);
+            if(intersect.length>0){
+            }
+
+			let mouse = new THREE.Vector3(Scene.vars.mouse.x, Scene.vars.mouse.y, 0);
+			mouse.unproject(Scene.vars.camera);
+
+			let ray = new THREE.Raycaster(Scene.vars.camera.position, mouse.sub(Scene.vars.camera.position).normalize()); 
+			let intersects = ray.intersectObjects(Scene.vars.UltimaThule.children, true);
+			if(intersects.length > 0) {
+                Scene.customAnimation2(0.005);
 			}
         }
         Scene.render();
@@ -49,22 +58,24 @@ const Scene = {
 		Scene.vars.stats.update();
 	},
 
-	customAnimation: () => {
+	customAnimation: (speed) => {
 		let vars = Scene.vars;
 
-		if (vars.animSpeed === null) {
-			return;
-		}
+		vars.animPercent = vars.animPercent + speed;
+		console.log(Scene.vars.animPercent);
 
-		vars.animPercent = vars.animPercent + vars.animSpeed;
+			Scene.vars.Arrokoth.rotation.y = Math.PI * vars.animPercent;
+			Scene.vars.Arrokoth.rotation.x = Math.PI * vars.animPercent/2;
+	},
 
-		if (vars.animPercent > 2) {
-			vars.animPercent = 0;
-			return;
-		}
+	customAnimation2: (speed) => {
+		let vars = Scene.vars;
 
-		Scene.vars.Arrokoth.rotation.x = Math.PI * vars.animPercent;
-		console.log(Scene.vars.Arrokoth.rotation.x);
+		vars.animPercent = vars.animPercent + speed;
+		console.log(Scene.vars.animPercent);
+
+			Scene.vars.UltimaThule.rotation.y = Math.PI * vars.animPercent;
+			Scene.vars.UltimaThule.rotation.x = Math.PI * vars.animPercent/2;
 	},
 
 	
