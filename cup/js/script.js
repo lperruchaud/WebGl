@@ -18,81 +18,43 @@ const Scene = {
 		animPercent: 0.00,
 		text: "DAWIN"
 	},
-	animate: () => {		
-		requestAnimationFrame(Scene.animate);
-		Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
+    animate: () => {
+        requestAnimationFrame(Scene.animate);
+        Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
+        if( Scene.vars.UltimaThule != undefined ){
+            var intersect = Scene.vars.raycaster.intersectObjects(Scene.vars.UltimaThule.children, true);
+            if(intersect.length>0){
+                let arrow = new THREE.ArrowHelper(Scene.vars.raycaster.ray.direction, Scene.vars.raycaster.ray.origin, 1000, 0xff0000);
+                Scene.vars.scene.add(arrow);
+                Scene.vars.animeSpeed = 0.05;
+                
+                Scene.customAnimation();
+            }
+        }
+        Scene.render();
+    },
 
-		//Scene.customAnimation();
-
-		if (Scene.vars.goldGroup !== undefined) {
-			let intersects = Scene.vars.raycaster.intersectObjects(Scene.vars.goldGroup.children, true);
-
-			if (intersects.length > 0) {
-				Scene.vars.animSpeed = 0.05;
-			} else {
-				Scene.vars.animSpeed = -0.05;
-			}
-
-			// let mouse = new THREE.Vector3(Scene.vars.mouse.x, Scene.vars.mouse.y, 0);
-			// mouse.unproject(Scene.vars.camera);
-
-			// let ray = new THREE.Raycaster(Scene.vars.camera.position, mouse.sub(Scene.vars.camera.position).normalize()); 
-			// let intersects = ray.intersectObjects(Scene.vars.goldGroup.children, true);
-			// if(intersects.length > 0) {
-			// 	var arrow = new THREE.ArrowHelper(ray.ray.direction, ray.ray.origin, 1000, 0xFF00000);
-			// 	Scene.vars.scene.add(arrow);
-			// }
-		}
-
-		Scene.render();
-	},
 	render: () => {
 		Scene.vars.renderer.render(Scene.vars.scene, Scene.vars.camera);
 		Scene.vars.stats.update();
 	},
-	// customAnimation: () => {
-	// 	let vars = Scene.vars;
 
-	// 	if (vars.animSpeed === null) {
-	// 		return;
-	// 	}
+	customAnimation: () => {
+		let vars = Scene.vars;
 
-	// 	vars.animPercent = vars.animPercent + vars.animSpeed;
+		if (vars.animSpeed === null) {
+			return;
+		}
 
-	// 	if (vars.animPercent < 0) {
-	// 		vars.animPercent = 0;
-	// 		return;
-	// 	}
-	// 	if (vars.animPercent > 1) {
-	// 		vars.animPercent = 1;
-	// 		return;
-	// 	}
+		vars.animPercent = vars.animPercent + vars.animSpeed;
 
-	// 	if (vars.animPercent <= 0.33) {
-	// 		Scene.vars.plaquette.position.z = 45 + (75 * vars.animPercent);
-	// 		Scene.vars.texte.position.z = 45 + (150 * vars.animPercent);
-	// 	}
+		if (vars.animPercent > 2) {
+			vars.animPercent = 0;
+			return;
+		}
 
-	// 	if (vars.animPercent >= 0.20 && vars.animPercent <= 0.75) {
-	// 		let percent = (vars.animPercent - 0.2) / 0.55;
-	// 		vars.socle1.position.x = 25 * percent;
-	// 		vars.socle2.position.x = -25 * percent;
-	// 		vars.logo.position.x = 45 + 50 * percent;
-	// 		vars.logo2.position.x = -45 - 50 * percent;
-	// 	} else if (vars.animPercent < 0.20) {
-	// 		vars.socle1.position.x = 0;
-	// 		vars.socle2.position.x = 0;
-	// 		vars.logo.position.x = 45;
-	// 		vars.logo2.position.x = -45;
-	// 	}
-
-	// 	if (vars.animPercent >= 0.40) {
-	// 		let percent = (vars.animPercent - 0.4) / 0.6;
-	// 		vars.statuette.position.y = 50 * percent;
-	// 	} else if (vars.animPercent < 0.70) {
-	// 		vars.statuette.position.y = 0;
-	// 	}
-	// },
+		Scene.vars.UltimaThule.rotation.x = Math.PI * animPercent;
+	},
 
 	
     loadFBX: (file, scale, position, rotation, color, namespace, callback) => {
@@ -262,29 +224,27 @@ const Scene = {
 		vars.scene.add(light3);
 
 		// ajout de la sphère
-		
-		console.log("ok");
 
 		vars.texture = new THREE.TextureLoader().load('./texture/sky.jpg');
+		let geometry = new THREE.SphereGeometry(1000, 32, 32);
+		let materialS = new THREE.MeshPhongMaterial({ map: Scene.vars.texture });
+		materialS.side = THREE.DoubleSide;
+		let sphere = new THREE.Mesh(geometry, materialS);
+		vars.scene.add(sphere);
+
+		// ajout d'ultima thule version parfaite
+
 		vars.textureUT1 = new THREE.TextureLoader().load('./texture/ultima_green.png');
 		vars.textureUT2 = new THREE.TextureLoader().load('./texture/ultima_red.jpg');
-		let geometry = new THREE.SphereGeometry(1000, 32, 32);
+
 		let CUltimaThule1 = new THREE.SphereGeometry(35, 45, 32);
 		let CUltimaThule2 = new THREE.SphereGeometry(50, 45, 32);
 		let ring = new THREE.RingGeometry(120, 160, 50);
-		let material = new THREE.MeshPhongMaterial({ map: Scene.vars.texture });
+
 		let materialUT1 = new THREE.MeshPhongMaterial({ map: Scene.vars.textureUT1 });
 		let materialUT2 = new THREE.MeshPhongMaterial({ map: Scene.vars.textureUT2 });
-		material.side = THREE.DoubleSide;
-		
-		let materialRing = new THREE.MeshStandardMaterial({
-				color:new THREE.Color(0xffffff),
-				roughness: .3,
-				metalness: .6
-			})
+		let materialRing = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xffffff), roughness: .3, metalness: .6 });
 		materialRing.side = THREE.DoubleSide;
-
-		let sphere = new THREE.Mesh(geometry, material);
 
 		let ut1 = new THREE.Mesh(CUltimaThule1, materialUT1);
 		let ut2 = new THREE.Mesh(CUltimaThule2, materialUT2);
@@ -298,31 +258,34 @@ const Scene = {
 		r.rotation.y = Math.PI/3;
 		r.rotation.z = Math.PI/5;
 
-		vars.scene.add(sphere);
 		vars.scene.add(ut1);
 		vars.scene.add(ut2);
 		vars.scene.add(r);
 
+		let GroupUT =new THREE.Group();
+		GroupUT.add(ut1);
+		GroupUT.add(ut2);
+		GroupUT.add(r);
 
-		console.log("ok");
+		vars.scene.add(GroupUT);
+
+		Scene.vars.UltimaThule = vars.scene.GroupUT;
+
+		//ajout du texte
 
 		let hash = document.location.hash.substr(1);
 		if (hash.length !== 0) {
-			let text = hash.substring();s
+			let text = hash.substring();
 			Scene.vars.text = decodeURI(text);
 		}
-		console.log("ok");
 
-		// Scene.loadFBX("UltimaThule.fbx", 1, [0, 0, 0], [0, 0, 0], 0xC0C0C0, 'Arrokoth', () => {
-		// 	console.log("ok");
-		// 						let vars = Scene.vars;
-		// 						vars.scene.add(Scene.vars.Arrokoth);
-		// });
+		Scene.loadFBX("ultima-thule-3d.fbx", 1000, [0, 0, 0], [0, 0, 0], 0xC0C0C0, 'Arrokoth', () => {
+			console.log("ok");
+			vars.scene.add(Scene.vars.Arrokoth);
+		});
 		
 		// ajout des controles
 		vars.controls = new OrbitControls(vars.camera, vars.renderer.domElement);
-		vars.controls.minDistance = 300;
-		vars.controls.maxDistance = 600;
 		vars.controls.update();
 
 		window.addEventListener('resize', Scene.onWindowResize, false);
@@ -330,7 +293,6 @@ const Scene = {
 
 		vars.stats = new Stats();
 		vars.container.appendChild(vars.stats.dom);
-
 		
 		document.getElementById('loading').style.display = "none";
 
