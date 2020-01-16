@@ -6,6 +6,7 @@ import { FBXLoader } from '../vendor/three.js-master/examples/jsm/loaders/FBXLoa
 const Scene = {
 	vars: {
 		container: null,
+		isReal: true,
 		scene: null,
 		renderer: null,
 		camera: null,
@@ -22,14 +23,23 @@ const Scene = {
         requestAnimationFrame(Scene.animate);
         Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
         if( Scene.vars.UltimaThule != undefined ){
-            var intersect = Scene.vars.raycaster.intersectObjects(Scene.vars.UltimaThule.children, true);
+            var intersect = Scene.vars.raycaster.intersectObjects(Scene.vars.Arrokoth.children, true);
             if(intersect.length>0){
-                let arrow = new THREE.ArrowHelper(Scene.vars.raycaster.ray.direction, Scene.vars.raycaster.ray.origin, 1000, 0xff0000);
-                Scene.vars.scene.add(arrow);
                 Scene.vars.animeSpeed = 0.05;
                 
                 Scene.customAnimation();
             }
+			let mouse = new THREE.Vector3(Scene.vars.mouse.x, Scene.vars.mouse.y, 0);
+			mouse.unproject(Scene.vars.camera);
+
+			let ray = new THREE.Raycaster(Scene.vars.camera.position, mouse.sub(Scene.vars.camera.position).normalize()); 
+			let intersects = ray.intersectObjects(Scene.vars.Arrokoth.children, true);
+			if(intersects.length > 0) {
+                Scene.vars.animeSpeed = 0.05;
+                
+                Scene.customAnimation();
+				console.log('1')
+			}
         }
         Scene.render();
     },
@@ -53,7 +63,8 @@ const Scene = {
 			return;
 		}
 
-		Scene.vars.UltimaThule.rotation.x = Math.PI * animPercent;
+		Scene.vars.Arrokoth.rotation.x = Math.PI * vars.animPercent;
+		console.log(Scene.vars.Arrokoth.rotation.x);
 	},
 
 	
@@ -146,6 +157,17 @@ const Scene = {
 	onMouseMove: (event) => {
 		Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 		Scene.vars.mouse.y = -(event.clientY / window.innerHeight ) * 2 + 1;
+	},
+	onClick: (event) => {
+		if(Scene.vars.isReal){
+			Scene.vars.scene.remove(Scene.vars.Arrokoth);
+			Scene.vars.scene.add(Scene.vars.UltimaThule);
+			Scene.vars.isReal = false;
+		} else {
+			Scene.vars.scene.remove(Scene.vars.UltimaThule);
+			Scene.vars.scene.add(Scene.vars.Arrokoth);
+			Scene.vars.isReal = true;
+		}
 	},
 	init: () => {
 		let vars = Scene.vars;
@@ -267,9 +289,7 @@ const Scene = {
 		GroupUT.add(ut2);
 		GroupUT.add(r);
 
-		vars.scene.add(GroupUT);
-
-		Scene.vars.UltimaThule = vars.scene.GroupUT;
+		Scene.vars.UltimaThule = GroupUT;
 
 		//ajout du texte
 
@@ -279,22 +299,24 @@ const Scene = {
 			Scene.vars.text = decodeURI(text);
 		}
 
-		Scene.loadFBX("ultima-thule-3d.fbx", 1000, [0, 0, 0], [0, 0, 0], 0xC0C0C0, 'Arrokoth', () => {
-			console.log("ok");
+		Scene.loadFBX("ultima-thule-3d.fbx", 1000, [50, 50, 0], [0, 0, 0], 0xC0C0C0, 'Arrokoth', () => {
 			vars.scene.add(Scene.vars.Arrokoth);
+			document.getElementById('loading').style.display = "none";
 		});
 		
 		// ajout des controles
 		vars.controls = new OrbitControls(vars.camera, vars.renderer.domElement);
+		vars.controls.minDistance = 300;
+		vars.controls.maxDistance = 600;
 		vars.controls.update();
 
 		window.addEventListener('resize', Scene.onWindowResize, false);
 		window.addEventListener('mousemove', Scene.onMouseMove, false);
+		window.addEventListener('click', Scene.onClick, false);
 
 		vars.stats = new Stats();
 		vars.container.appendChild(vars.stats.dom);
 		
-		document.getElementById('loading').style.display = "none";
 
 		Scene.animate();
 	}
