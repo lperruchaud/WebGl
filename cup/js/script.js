@@ -115,48 +115,6 @@ const Scene = {
         });
         
     },
-        
-	loadText: (text, scale, position, rotation, color, namespace, callback) => {
-		let loader = new THREE.FontLoader();
-
-		if (text === undefined || text === "") {
-			return;
-		}
-
-		loader.load('./vendor/three.js-master/examples/fonts/helvetiker_regular.typeface.json', (font) => {
-			let geometry = new THREE.TextGeometry(text, {
-				font,
-				size: 1,
-				height: 0.1,
-				curveSegments: 1,
-				bevelEnabled: false
-			});
-
-			geometry.computeBoundingBox();
-			let offset = geometry.boundingBox.getCenter().negate();
-			geometry.translate(offset.x, offset.y, offset.z);
-
-			let material = new THREE.MeshBasicMaterial({
-				color: new THREE.Color(color)
-			});
-
-			let mesh = new THREE.Mesh(geometry, material);
-
-			mesh.position.x = position[0];
-			mesh.position.y = position[1];
-			mesh.position.z = position[2];
-
-			mesh.rotation.x = rotation[0];
-			mesh.rotation.y = rotation[1];
-			mesh.rotation.z = rotation[2];
-
-			mesh.scale.x = mesh.scale.y = mesh.scale.z = scale;
-
-			Scene.vars[namespace] = mesh;
-
-			callback();
-		});
-	},
 	onWindowResize: () => {
 		let vars = Scene.vars;
 		vars.camera.aspect = window.innerWidth / window.innerHeight;
@@ -299,14 +257,6 @@ const Scene = {
 		GroupUT.add(r);
 
 		Scene.vars.UltimaThule = GroupUT;
-
-		//ajout du texte
-
-		let hash = document.location.hash.substr(1);
-		if (hash.length !== 0) {
-			let text = hash.substring();
-			Scene.vars.text = decodeURI(text);
-		}
 
 		Scene.loadFBX("ultima-thule-3d.fbx", 1000, [50, 50, 0], [0, 0, 0], 0xC0C0C0, 'Arrokoth', () => {
 			vars.scene.add(Scene.vars.Arrokoth);
