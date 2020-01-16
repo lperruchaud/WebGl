@@ -62,7 +62,6 @@ const Scene = {
 		let vars = Scene.vars;
 
 		vars.animPercent = vars.animPercent + speed;
-		console.log(Scene.vars.animPercent);
 
 			Scene.vars.Arrokoth.rotation.y = Math.PI * vars.animPercent;
 			Scene.vars.Arrokoth.rotation.x = Math.PI * vars.animPercent/2;
@@ -72,7 +71,6 @@ const Scene = {
 		let vars = Scene.vars;
 
 		vars.animPercent = vars.animPercent + speed;
-		console.log(Scene.vars.animPercent);
 
 			Scene.vars.UltimaThule.rotation.y = Math.PI * vars.animPercent;
 			Scene.vars.UltimaThule.rotation.x = Math.PI * vars.animPercent/2;
